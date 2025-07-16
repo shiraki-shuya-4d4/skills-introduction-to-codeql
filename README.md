@@ -16,46 +16,73 @@ _アプリケーションソースコードのセキュリティを確保する�
 </header>
 
 <!--
-  <<< Author notes: Step 3 >>>
+  <<< Author notes: Step 4 >>>
   Start this step by acknowledging the previous step.
   Define terms and link to docs.github.com.
-  TBD-step-3-notes.
+  TBD-step-4-notes.
 -->
 
-## Step 3: セキュリティ脆弱性を修正する
+## Step 4: Prevent Vulnerabilities in the Pull Request
 
-_Step 2: CodeQLアラートのレビューとトリアージが完了しました。お疲れ様でした :sparkles:_
-  
-このステップでは、CodeQLによって既に特定された既存のセキュリティ脆弱性を修正します。この時点で、私たちはリポジトリにCodeQLを導入し、既存のコードをスキャンしました。発見された脆弱性は実世界の問題であり、修正する必要があります！`/server/routes.py`ファイルを編集してこの問題を修正します。
+_Nicely done! You finished Step 3: Fix Security Vulnerabilites! :partying_face:_
 
-### :keyboard: Activity 1: アラートをレビューする
-まず、これらのアラートを修正する前に、アラートがまだ開いていることを確認する必要があります。また、どのファイルを修正し、どのように修正するのが最適かについての情報を収集する必要があります。
+Way to go! You made it this far. We're almost done! The last step is to test out the pull request integration with CodeQL. In this step, we will add a vulnerability back into the `routes.py` file to trigger an alert for a SQL injection vulnerability. This is going to be the same issue we initially saw.  
+  
+Our goal is to understand what developers experience when they find a new vulnerability.  
 
-1. コードスキャンアラートページに移動します：**Security** > **Code scanning**
-1. 「**Open**」としてリストされた2つのアラートが表示されるはずです。いずれかのアラートが「**Closed**」としてリストされている場合は、アラートページを開いて「**Reopen alert**」を選択してください。
+In this step, we will:
+- edit the `routes.py` file.
+- change the SQL statement to make it insecure.
+- commit those changes and merge the insecure code into the main branch.
+- experience the alert inside the pull request.
+  
+Let's get started 👍
 
-これで両方のアラートが開いているので、修正しましょう。アラートを確認すると、どちらも問題を含む特定のファイルを指しています：`server/routes.py`。問題はデータベースのSQLクエリの作成にあります。これらのクエリはSQLインジェクション攻撃に対して脆弱です。これらのSQL文をより安全に書き直す必要があります。
-  
-アラートの下部にある**More info**セクションを展開すると、このクエリを修正するための明確な提案があります。次のアクティビティでこれらの提案を実装します。
+**What is pull request**: Pull requests are proposed changes to a repository submitted by a user and accepted or rejected by a repository's collaborators. This allows multiple people to work on the same code at the same time. For more information, check out the GitHub Skills course "[Introduction to GitHub](https://github.com/skills/introduction-to-github)" or "[About pull requests](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests)" from the GitHub docs.
 
-### :keyboard: Activity 2: routes.pyを編集する
-問題がどこにあり、どのように修正するかがわかったので、`routes.py`ファイルの修正を開始します。次のステップは、別のブラウザウィンドウまたはタブで行うことをお勧めします。
+**What is branch**: A branch is a parallel version of your repository. By default, your repository has one branch named main and it is considered to be the definitive branch. Creating additional branches allows you to copy the main branch of your repository and safely make any changes without disrupting the main project. For more information, see "[About branches](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-branches#)" in the GitHub docs.
+
+### :keyboard: Activity 1: Edit `routes.py` and create a new pull request
+
+In this first activity, we'll introduce the same insecure SQL statement from before to the `routes.py` file. Once we update the file, we'll commit it to a new branch, then create a pull request.
+
+  1. Click the **Code** tab in your repository.
+  2. Select the `server` folder.
+  3. Select the `routes.py` file.
+  4. Click the **Edit** button to the right.
+
+![edit-button.png](/images/edit-button.png)
   
-1. リポジトリの**Code**タブをクリックします。
-2. `server`フォルダを選択します。
-3. `routes.py`ファイルを選択します。
-4. 右側の**Edit**ボタンをクリックします。
+  5. Edit line 16 by highlighting the SQL statement and replace it with this text: `"SELECT * FROM books WHERE name LIKE '%" + name + "%'"`.
+  6. Click **Commit changes...** from the top right. The "Propose changes" window will pop up.
+  7. This time, select the radio button next to **Create a new branch**. You can create a new name for this branch or leave it as the default suggestion.
+  8. Click **Propose changes**. This opens a new pull request.
+  9. In the "Open a pull request" window, click **Create pull request**.
   
-  ![edit-button.png](/images/edit-button.png)
+
+### :keyboard: Activity 2: Review pull request
+
+At this point, we've edited the file `routes.py` to add our vulnerable code, committed those changes to our new branch, and created a pull request to merge the new branch into our `main` branch. These are the same steps a developer would take to introduce new, vulnerable code into a repository. 
   
-5. 16行目を編集し、SQL文をハイライトしてこのテキストに置き換えます：`"SELECT * FROM books WHERE name LIKE %s", name`
+Now, let's take a look at the pull request to see what the experience is like.
   
-6. 22行目を編集し、SQL文をこのテキストに置き換えます：`"SELECT * FROM books WHERE author LIKE %s", author`
+1. In the previous activity, we created the pull request.  After creating the pull request, you were brought directly to the pull request page. At the bottom of the pull request, you will see a check called "Code scanning/CodeQL". This is the CodeQL analysis job scanning the code introduced in the pull request.
+
+![pr-panel](/images/pr-panel.png)
+
+2.  Once the check is complete, you will see a new comment in the pull request from CodeQL indicating a new security vulnerability; a SQL query built from user-controlled data. This is our SQL injection vulnerability.
   
-7. 右上の**Commit changes...**をクリックします。「Propose changes」ウィンドウがポップアップします。デフォルトの設定のままにして、再度**Commit changes**をクリックします。
-8. CodeQLが新しいスキャンを開始します。**Actions**に移動し、**CodeQL**アクションを選択してそのスキャンのステータスを確認します。スキャンジョブが完了すると、ActionsはGitHubページの最後の実行の横に緑色のチェックマークを表示します。
-9. そのCodeQLスキャンが完了したら、**Security** > **Code scanning**に移動してアラートをレビューします。開いているアラートはゼロ、閉じられたアラートは2つになっているはずです🎉。閉じられたアラート、特に監査証跡を自由にレビューしてください。
-10. 約20秒待ってから、このページ（指示に従っているページ）を更新してください。[GitHub Actions](https://docs.github.com/en/actions)が自動的に次のステップに更新されます。
+  <img width="1180" alt="image" src="https://github.com/leftrightleft/enable-code-scanning/assets/4910518/378bd766-ef61-4619-ab3c-bf2c8d9618d7">
+
+3. Review the data flow paths by clicking **Show paths**.
+  
+4. If you would like, add a comment and tag one of your friends by using their GitHub handle (example: `@username`). This will notify them that you made a comment on the issue and need their help solving the problem. 😄
+
+If this were a real-world situation, the developer would fix the SQL statement in their branch. Once fixed, the vulnerability will automatically close out.
+
+If you would like to learn more about pull request integrations for code scanning, see "[Triaging code scanning alerts in pull requests](https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/triaging-code-scanning-alerts-in-pull-requests)."
+
+5. Wait about 20 seconds then refresh this page (the one you're following instructions from). [GitHub Actions](https://docs.github.com/en/actions) will automatically update to the next step.
 
 <footer>
 
