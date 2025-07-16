@@ -20,26 +20,26 @@ _アプリケーションソースコードのセキュリティを確保する�
   Review what we learned, ask for feedback, provide next steps.
 -->
 
-## Finish
+## 完了
 
-_Congratulations! You have completed this course!_ 🏆
+_おめでとうございます！このコースを修了しました！_ 🏆
 
-Here's a recap of all the tasks you accomplished in your repository:
-  - Enabled CodeQL on your repository.
-  - CodeQL scanned the code in your repository and notified us of two SQL injection vulnerabilities.
-  - Reviewed the findings, marked the findings as closed, and explored the audit trail.
-  - Fixed your code in the main branch and saw that the findings automatically closed out.
-  - Introduced a new vulnerability in a new branch.
-  - Created a pull request, and were notified of the vulnerability.
+このリポジトリで実行したタスクの概要は次のとおりです：
+  - リポジトリでCodeQLを有効化しました。
+  - CodeQLがリポジトリのコードをスキャンし、2つのSQLインジェクション脆弱性を通知しました。
+  - 調査結果を確認し、調査結果を閉じたものとしてマークし、監査証跡を探索しました。
+  - メインブランチのコードを修正し、調査結果が自動的に閉じられることを確認しました。
+  - 新しいブランチに新しい脆弱性を導入しました。
+  - プルリクエストを作成し、脆弱性の通知を受けました。
 
-### What's next?
+### 次のステップ
 
-- Continue your learning! Our [code scanning documentation](https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/about-code-scanning) is a great resource for learning more about CodeQL.
-- Learn more about CodeQL. Take a look at the [CodeQL documenation](https://codeql.github.com/docs/) site to learn about all of the features of this powerful tool.
-- [We'd love to hear what you thought of this course](https://github.com/orgs/skills/discussions/405).
-- [Take another Skills course.](https://github.com/skills).
-- [Read the GitHub Getting Started docs](https://docs.github.com/en/get-started).
-- To find projects to contribute to, check out [GitHub Explore](https://github.com/explore).
+- 学習を続けましょう！[コードスキャンドキュメント](https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/about-code-scanning)は、CodeQLについてさらに学習するための優れたリソースです。
+- CodeQLについてさらに学びましょう。[CodeQLドキュメント](https://codeql.github.com/docs/)サイトを見て、この強力なツールのすべての機能について学びましょう。
+- [このコースについてどう思ったかお聞かせください](https://github.com/orgs/skills/discussions/405)。
+- [別のSkillsコースを受講してください](https://github.com/skills)。
+- [GitHub スタートガイドドキュメントを読んでください](https://docs.github.com/en/get-started)。
+- 貢献するプロジェクトを見つけるには、[GitHub Explore](https://github.com/explore)をチェックしてください。
 
 <footer>
 
