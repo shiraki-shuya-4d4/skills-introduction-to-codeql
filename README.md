@@ -42,7 +42,7 @@ _アプリケーションソースコードのセキュリティを確保する�
 
 1. 新しいブラウザタブを開き、このタブで手順を読みながら、2番目のタブでステップを実行します。
 2. 新しく作成されたリポジトリの上部にある **Settings** タブに移動します。
-3. 左側の **Security** セクションで、**Code security and analysis** を選択します。
+3. 左側の **Security** セクションで、**Advanced Security** を選択します。
 4. **Code scanning** というタイトルのセクションまでスクロールダウンします。このコースでは、CodeQL分析に焦点を当てます。
 5. **Set up** ドロップダウンメニューをクリックして、**Default** を選択します。
 ![enable-code-scanning-default.png](/images/enable-code-scanning-default.png)
