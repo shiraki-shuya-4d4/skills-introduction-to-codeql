@@ -16,93 +16,46 @@ _アプリケーションソースコードのセキュリティを確保する�
 </header>
 
 <!--
-  <<< Author notes: Step 2 >>>
+  <<< Author notes: Step 3 >>>
   Start this step by acknowledging the previous step.
   Define terms and link to docs.github.com.
-  TBD-step-2-notes.
+  TBD-step-3-notes.
 -->
 
-## ステップ2: CodeQLアラートのレビューとトリアージ
+## Step 3: Fix Security Vulnerabilities
 
-_素晴らしい！CodeQLが動作しています！ :tada:_
-
-この演習では、CodeQLスキャンの結果をレビューし、アラートをトリアージし、アラートを追跡するためのGitHub Issueを作成します。
-
-**GitHub Actionsとは**: GitHub ActionsはGitHub内の自動化およびCI/CDプラットフォームです。私たちはGitHub Actionsを使用して、コードスキャンでセキュリティスキャンを統括・実行します。GitHub Actionsは継続的インテグレーション・継続的デリバリー（CI/CD）プラットフォームで、ビルド、テスト、デプロイメントパイプラインを自動化できます。GitHub Actionsの詳細については、「[GitHub Actionsを理解する](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions)」を参照してください。
-
-**CWEとは**: Common Weakness Enumeration（CWE）は、ハードウェアおよびソフトウェアの弱点と脆弱性のカテゴリシステムです。これは、アプリケーションのソースコードにおけるセキュリティ問題を説明・分類する方法と考えてください。CWEの詳細については、Wikipedia記事「[Common Weakness Enumeration](https://en.wikipedia.org/wiki/Common_Weakness_Enumeration)」を参照してください。
-
-### :keyboard: アクティビティ1: CodeQLスキャンのステータス確認
-
-このアクティビティでは、GitHub Actionsを使用してCodeQLスキャンのステータスを確認します。
-1. 新しいリポジトリで、トップナビゲーションバーから**Actions**を選択してActionsページに移動します。CodeQL Actionの実行がまだ実行中の場合、スキャンがまだ進行中であることを示す黄色のスピナーが表示されます。通常、完了まで約4分かかります。
-2. **CodeQL Setup**をクリックして実行を選択します。
-
-![codeql-setup](/images/codeql-setup.png)
-
-Actionsの実行内でより多くの情報が利用できることに注意してください。このセクションを自由に探索して、CodeQLログ、実行時間、ステータス、CodeQLによって生成されたアーティファクトなどの情報を確認してください。
-
-スキャンが完了すると、実行の横に緑のチェックが表示されます。  
+_Nice work finishing Step 2: Reviewing and Triaging CodeQL Alerts :sparkles:_
   
-### :keyboard: アクティビティ2: すべてのCodeQLアラートの確認
+In this step, we will work to fix the existing security vulnerabilities already identified by CodeQL. Remember, at this point, we have introduced CodeQL into our repository and had it scan the existing code. The vulnerabilities it found are real-world issues, and they need to be fixed! We'll fix this issue by editing the `/server/routes.py` file.  
 
-このアクティビティでは、リポジトリのセキュリティページでCodeQLの発見事項を確認します。セキュリティページは、すべてのセキュリティ関連情報が表示される場所です。
+### :keyboard: Activity 1: Review alerts
+First, before we fix these alerts, we need to make sure the alerts are still open. We'll also need to gather information on which files to fix and how best to fix them.
 
-1. リポジトリのトップナビゲーションバーで**Security**タブに移動します。
-2. 左側のナビゲーションバーの「Vulnerability alerts」の見出しの下にある**Code scanning**を選択します。
+1. Navigate to your code scanning alerts page: **Security** > **Code scanning**. 
+1. You should see two alerts listed as "**Open**". If any of the alerts are listed as "**Closed**", open the alert page and choose **Reopen alert**.
 
-この画面には、このリポジトリのコードベース内でCodeQLによって特定されたすべての脆弱性が表示されます。このページのさまざまなフィルターと検索機能を調べてください。これらのフィルタリング機能は、多くの発見事項を扱う際に非常に役立ちます！
+Now that both of these alerts are open, let's fix them. If you look at the alerts, they both call out one specific file containing the issues: `server/routes.py`. The issue is in crafting the SQL query for the database. These queries are vulnerable to SQL injection attacks. We should rewrite these SQL statements more securely. 
+  
+If you expand the **More info** section at the bottom of the alert, there are very clear suggestions to fix this query. We're going to implement those suggestions in the next activity.
 
-
-### :keyboard: アクティビティ3: アラートのレビュー
-
-このアクティビティでは、アラートUIを探索します。脆弱性のデータフローをレビューし、アラートがコードのどの部分に影響するかを特定し、アラートに関する詳細情報を取得します。
-
-**アラートステータス:** このセクションでは、現在のアラートステータス（オープンまたはクローズ）を表示し、スキャンがアラートを検出したブランチを特定し、アラートのタイムスタンプを表示します。
-
-![alert-status](/images/alert-status.png)
-
-**位置情報:** このセクションでは、コードのどの部分が脆弱であるかを説明します。
-
-![location-information](/images/location-information.png)
-
-**パス:** 「Show paths」をクリックすると、アラートのデータフローに関する追加の洞察が得られます。モーダルでは、ユーザー入力（これを「ソース」と呼びます）がアプリケーションを流れ、処理される（これを「シンク」と呼びます）までの流れを示します。これにより、アプリケーション内のデータの流れを可視化できます。
-
-**推奨事項:** このセクションでは、ツール（この場合はCodeQL）、ルールID、さらにはこの脆弱性を見つけるために使用されたCodeQLクエリを表示できます。**View source**をクリックしてクエリを表示できます。さらに、このペインには、この脆弱性を修正するための推奨事項が含まれています。**Show more**をクリックして、完全な推奨事項を表示します。
-
-![recommendations](/images/recommendations.png)
-
-**監査証跡:** 監査証跡は、アラートの履歴を示します。この証跡は、ユーザーがアラートをクローズとしてマークしたり、コード内のアラートを修正したりする際のステータスを表示します。
-
-![audit-trail](/images/audit-trail.png)
-
-**アラートトリアージ:** アラートの右上にあるボタンを使用して、アラートをトリアージしたり、アラートに対して新しいイシューを作成したりします。まだ何もしないでください。すぐにこれらのボタンについて説明します。😄
-
-**追加情報:** 最後に、右側のパネルには、タグ、CWE情報、アラートの重要度などの情報が含まれています。
-  ![additional-information.png](/images/additiona-information.png)
-
-
-### :keyboard: アクティビティ4: アラートを閉じる
-アラートのレイアウトに慣れたところで、アラートをクローズするプロセスを実行してみましょう。
-
-1. この同じアラート内で、**Dismiss alert**をクリックし、却下する理由を選択し、短いメモを追加します。
-2. **Dismiss alert**をクリックします。
-3. この時点で、アラートのステータスが「Dismissed」に変わります。アラートの下部にある監査証跡で、自分が行った変更を確認できます。
-4. **Security** > **Code scanning alerts**に戻ります。1つのアラートのみがリストされていることがわかります。
-5. **1 Closed**をクリックします。これにより、閉じたアラートが表示され、今閉じたアラートを確認できます。
-   ![one-closed-alert.png](/images/one-closed-alert.png)
-
-7. （オプション）アラートを開いて**Reopen alert**を選択することで、アラートを再度開くこともできます。
-
-### :keyboard: アクティビティ5: アラートに対するGitHub Issueの作成
-この最後のステップでは、脆弱性の解決に向けた作業を追跡するためのGitHub Issueを作成する方法を示します。Issueは、セキュリティ問題に対するコラボレーションのスペースを提供し、個人やチームに割り当てることができます。
-
-1. スキャンでCodeQLが特定したオープンアラートの1つを開きます。
-2. アラートの右上にある緑色の**Create issue**ボタンをクリックします。このボタンが表示されない場合は、アラートのステータスを確認して、オープンアラートであることを確認してください。
-3. 新しいイシューフォームに含めたい詳細を追加します。
-4. **Submit new issue**をクリックします。
-5. イシューを表示するには、リポジトリのトップナビゲーションバーで**Issues**をクリックします。
-6. 約20秒待ってから、このページ（手順を説明しているページ）を更新します。[GitHub Actions](https://docs.github.com/en/actions)が自動的に次のステップに更新されます。
+### :keyboard: Activity 2: Edit routes.py
+We now know where the issues exist and how to fix them. We'll start by modifying the file `routes.py`. Again, you'll want to do these next steps in a separate browser window or tab.
+  
+1. Click the **Code** tab in your repository.
+2. Select the `server` folder.
+3. Select the `routes.py` file.
+4. Click the **Edit** button to the right.
+  
+  ![edit-button.png](/images/edit-button.png)
+  
+5. Edit line 16 by highlighting the SQL statement and replace it with this text: `"SELECT * FROM books WHERE name LIKE %s", name`.
+  
+6. Edit line 22 to replace the SQL statement with this text: `"SELECT * FROM books WHERE author LIKE %s", author`.
+  
+7. Click **Commit changes...** from the top right. The "Propose changes" window will pop up. Leave the defaults configured, and click **Commit changes** again.
+8. CodeQL will now initiate a new scan. Check the status of that scan by navigating to **Actions** then choose the **CodeQL** action. Once the scan job completes, Actions will display a green check next to the last run.
+9. Once that CodeQL scan is done, navigate to **Security** > **Code scanning** to review the alerts. You should have zero open alerts and two closed alerts 🎉. Feel free to review the closed alerts, especially the audit trail.  
+10. Wait about 20 seconds then refresh this page (the one you're following instructions from). [GitHub Actions](https://docs.github.com/en/actions) will automatically update to the next step.
 
 <footer>
 
