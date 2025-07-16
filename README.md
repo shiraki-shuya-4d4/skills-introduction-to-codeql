@@ -22,40 +22,40 @@ _アプリケーションソースコードのセキュリティを確保する�
   TBD-step-3-notes.
 -->
 
-## Step 3: Fix Security Vulnerabilities
+## Step 3: セキュリティ脆弱性を修正する
 
-_Nice work finishing Step 2: Reviewing and Triaging CodeQL Alerts :sparkles:_
+_Step 2: CodeQLアラートのレビューとトリアージが完了しました。お疲れ様でした :sparkles:_
   
-In this step, we will work to fix the existing security vulnerabilities already identified by CodeQL. Remember, at this point, we have introduced CodeQL into our repository and had it scan the existing code. The vulnerabilities it found are real-world issues, and they need to be fixed! We'll fix this issue by editing the `/server/routes.py` file.  
+このステップでは、CodeQLによって既に特定された既存のセキュリティ脆弱性を修正します。この時点で、私たちはリポジトリにCodeQLを導入し、既存のコードをスキャンしました。発見された脆弱性は実世界の問題であり、修正する必要があります！`/server/routes.py`ファイルを編集してこの問題を修正します。
 
-### :keyboard: Activity 1: Review alerts
-First, before we fix these alerts, we need to make sure the alerts are still open. We'll also need to gather information on which files to fix and how best to fix them.
+### :keyboard: Activity 1: アラートをレビューする
+まず、これらのアラートを修正する前に、アラートがまだ開いていることを確認する必要があります。また、どのファイルを修正し、どのように修正するのが最適かについての情報を収集する必要があります。
 
-1. Navigate to your code scanning alerts page: **Security** > **Code scanning**. 
-1. You should see two alerts listed as "**Open**". If any of the alerts are listed as "**Closed**", open the alert page and choose **Reopen alert**.
+1. コードスキャンアラートページに移動します：**Security** > **Code scanning**
+1. 「**Open**」としてリストされた2つのアラートが表示されるはずです。いずれかのアラートが「**Closed**」としてリストされている場合は、アラートページを開いて「**Reopen alert**」を選択してください。
 
-Now that both of these alerts are open, let's fix them. If you look at the alerts, they both call out one specific file containing the issues: `server/routes.py`. The issue is in crafting the SQL query for the database. These queries are vulnerable to SQL injection attacks. We should rewrite these SQL statements more securely. 
+これで両方のアラートが開いているので、修正しましょう。アラートを確認すると、どちらも問題を含む特定のファイルを指しています：`server/routes.py`。問題はデータベースのSQLクエリの作成にあります。これらのクエリはSQLインジェクション攻撃に対して脆弱です。これらのSQL文をより安全に書き直す必要があります。
   
-If you expand the **More info** section at the bottom of the alert, there are very clear suggestions to fix this query. We're going to implement those suggestions in the next activity.
+アラートの下部にある**More info**セクションを展開すると、このクエリを修正するための明確な提案があります。次のアクティビティでこれらの提案を実装します。
 
-### :keyboard: Activity 2: Edit routes.py
-We now know where the issues exist and how to fix them. We'll start by modifying the file `routes.py`. Again, you'll want to do these next steps in a separate browser window or tab.
+### :keyboard: Activity 2: routes.pyを編集する
+問題がどこにあり、どのように修正するかがわかったので、`routes.py`ファイルの修正を開始します。次のステップは、別のブラウザウィンドウまたはタブで行うことをお勧めします。
   
-1. Click the **Code** tab in your repository.
-2. Select the `server` folder.
-3. Select the `routes.py` file.
-4. Click the **Edit** button to the right.
+1. リポジトリの**Code**タブをクリックします。
+2. `server`フォルダを選択します。
+3. `routes.py`ファイルを選択します。
+4. 右側の**Edit**ボタンをクリックします。
   
   ![edit-button.png](/images/edit-button.png)
   
-5. Edit line 16 by highlighting the SQL statement and replace it with this text: `"SELECT * FROM books WHERE name LIKE %s", name`.
+5. 16行目を編集し、SQL文をハイライトしてこのテキストに置き換えます：`"SELECT * FROM books WHERE name LIKE %s", name`
   
-6. Edit line 22 to replace the SQL statement with this text: `"SELECT * FROM books WHERE author LIKE %s", author`.
+6. 22行目を編集し、SQL文をこのテキストに置き換えます：`"SELECT * FROM books WHERE author LIKE %s", author`
   
-7. Click **Commit changes...** from the top right. The "Propose changes" window will pop up. Leave the defaults configured, and click **Commit changes** again.
-8. CodeQL will now initiate a new scan. Check the status of that scan by navigating to **Actions** then choose the **CodeQL** action. Once the scan job completes, Actions will display a green check next to the last run.
-9. Once that CodeQL scan is done, navigate to **Security** > **Code scanning** to review the alerts. You should have zero open alerts and two closed alerts 🎉. Feel free to review the closed alerts, especially the audit trail.  
-10. Wait about 20 seconds then refresh this page (the one you're following instructions from). [GitHub Actions](https://docs.github.com/en/actions) will automatically update to the next step.
+7. 右上の**Commit changes...**をクリックします。「Propose changes」ウィンドウがポップアップします。デフォルトの設定のままにして、再度**Commit changes**をクリックします。
+8. CodeQLが新しいスキャンを開始します。**Actions**に移動し、**CodeQL**アクションを選択してそのスキャンのステータスを確認します。スキャンジョブが完了すると、ActionsはGitHubページの最後の実行の横に緑色のチェックマークを表示します。
+9. そのCodeQLスキャンが完了したら、**Security** > **Code scanning**に移動してアラートをレビューします。開いているアラートはゼロ、閉じられたアラートは2つになっているはずです🎉。閉じられたアラート、特に監査証跡を自由にレビューしてください。
+10. 約20秒待ってから、このページ（指示に従っているページ）を更新してください。[GitHub Actions](https://docs.github.com/en/actions)が自動的に次のステップに更新されます。
 
 <footer>
 
