@@ -1,0 +1,166 @@
+サードパーティ製ツールを使用してコード スキャンを有効にする
+完了
+100 XP
+4 分
+GitHub でコード スキャンを実行する代わりに、他の場所で分析を実行してから、結果をアップロードすることができます。 外部で実行するコード スキャンのアラートは、GitHub 内で実行したときと同じ方法で表示されます。 GitHub の外部で生成された SARIF (Static Analysis Results Interchange Format) ファイルをアップロードすることも、GitHub Actions を使用して、ご使用のリポジトリ内のサードパーティ製ツールからコード スキャンのアラートを表示することもできます。
+
+このユニットでは、サードパーティ製ツールを使用してコード スキャンを有効にする方法と、SARIF ファイルを使用およびアップロードする方法を学習します。
+
+コード スキャン用の SARIF ファイルのアップロードについて
+GitHub は、SARIF ファイルからの情報を使用して、リポジトリにコード スキャンのアラートを作成します。 SARIF ファイルは、CodeQL などの多くのスタティック分析セキュリティ テスト ツールを使用して生成できます。 結果は SARIF バージョン 2.1.0 を使用する必要があります。
+
+コードスキャン API、CodeQL CLI、または GitHub Actions を使用して、結果をアップロードできます。 最適なアップロード方法は、SARIF ファイルの生成方法によって異なります。
+
+コードスキャン API
+コードスキャン API を使用すると、コード スキャンのアラート、分析、データベース、既定のセットアップ構成に関する情報をリポジトリから取得できます。 さらに、コードスキャン アラートと既定のセットアップ構成を更新できます。 エンドポイントを使用して、組織内のコードスキャンのアラートの自動レポートを作成したり、オフライン コードスキャン ツールを使用して生成された分析結果をアップロードしたりできます。
+
+GitHub API には、https://api.github.com から HTTPS 経由でアクセスできます。 すべてのデータは JSON として送受信されます。 この API はカスタム メディアの種類を使用して、コンシューマーが受信するデータの形式を選択できるようにします。 メディアの種類はリソースに固有であるため、個別に変更したり、他のリソースではサポートされていない形式をサポートしたりできます。
+
+code scanning REST API には、サポートされているカスタム メディアの種類が 1 つあります ( application/sarif+json)。
+
+このメディアの種類は、/analyses/{analysis_id} エンドポイントに送信される GET 要求で使用できます。 この操作でこのメディアの種類を使用する場合、応答には、既定のメディアの種類を使用したときに返される分析の概要ではなく、指定された分析に対してアップロードされた実際のデータのサブセットが含まれます。 この応答には、github/alertNumber や github/alertUrl のプロパティなどの追加データも含まれます。 データは SARIF バージョン 2.1.0 として書式設定されます。
+
+API を使用して組織のコード スキャン アラートを一覧表示する cURL コマンドの例を次に示します。
+
+
+コピー
+curl -L \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer <YOUR-TOKEN>" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/orgs/ORG/code-scanning/alerts
+コード スキャン API の使用方法の詳細については、 GitHub REST API のドキュメント を参照してください。
+
+CodeQL CLIの
+CodeQL CLI は、コードの分析に使用できるスタンドアロン製品です。 その主な目的は、コードベース (CodeQL データベース) のデータベース表現を生成することです。 データベースの準備ができたら、対話形式でクエリを実行するか、一連のクエリを実行して一連の結果を SARIF 形式で生成し、結果を GitHub.com にアップロードできます。 CodeQL CLI は、GitHub.com で管理されているパブリック リポジトリで無料で使用でき、Advanced Security ライセンスを持つ顧客所有のプライベート リポジトリで使用できます。 CodeQL バンドルは、https://github.com/github/codeql-action/releases からダウンロードします。
+
+このバンドルには次のものが含まれています。
+
+CodeQL CLI 製品
+https://github.com/github/codeql からのクエリとライブラリの互換性のあるバージョン
+バンドルに含まれるすべてのクエリのプリコンパイル済みバージョン
+常に CodeQL バンドルを使用する必要があります。その理由は、これにより、互換性が保証され、CodeQL CLI を個別にダウンロードして CodeQL クエリをチェックアウトするよりもはるかに優れたパフォーマンスが得られるからです。
+
+GitHub Actions を使用したコードスキャン分析
+GitHub Actions を使用してサードパーティ製の SARIF ファイルをリポジトリにアップロードするには、GitHub Actions ワークフローが必要です。 GitHub Actions ワークフローは、自動化されたプロセスであり、1 つ以上のジョブで構成され、.yml ファイルとして構成されます。 ワークフローは、ご自分のリポジトリの .github/workflows ディレクトリに格納されます。
+
+ワークフローでは、upload-sarif リポジトリの一部である github/codeql-action アクションが使用されます。 このワークフローには、アップロードの構成に使用できる入力パラメーターが含まれています。
+
+メイン入力パラメーターは sarif-file で、アップロードする SARIF ファイルのファイルまたはディレクトリを構成します。 ディレクトリまたはファイルのパスは、リポジトリのルートからの相対パスです。
+
+upload-sarif アクションは、push および scheduled イベントが発生したときに実行されるように構成できます。
+
+この例では、upload-sarif アクションの yml ファイルの要素の概要を説明します。
+
+
+コピー
+name: 'Code Scanning : Upload SARIF'
+description: 'Upload the analysis results'
+author: 'GitHub'
+inputs:
+  sarif_file:
+    description: |
+      The SARIF file or directory of SARIF files to be uploaded to GitHub code scanning.
+      See https://docs.github.com/en/code-security/code-scanning/integrating-with-code-scanning/
+      uploading-a-sarif-file-to-github#uploading-a-code-scanning-analysis-with-github-actions
+      for information on the maximum number of results and maximum file size supported by code scanning.
+    required: false
+    default: '../results'
+  checkout_path:
+    description: "The path at which the analyzed repository was checked out. 
+    Used to relativize any absolute paths in the uploaded SARIF file."
+    required: false
+    default: ${{ github.workspace }}
+  token:
+    default: ${{ github.token }}
+  matrix:
+    default: ${{ toJson(matrix) }}
+  category:
+    description: String used by Code Scanning for matching the analyses
+    required: false
+  wait-for-processing:
+    description: If true, the Action will wait for the uploaded SARIF to be processed before completing.
+    required: true
+    default: "false"
+runs:
+  using: 'node12'
+  main: '../lib/upload-sarif-action.js' 
+新しいコード スキャンの結果がアップロードされるたびに、結果が処理され、アラートがリポジトリに追加されます。 GitHub は、SARIF ファイルのプロパティを使用してアラートを表示します。 たとえば、同じ問題に対するアラートの重複を防ぐために、コード スキャンではフィンガープリントを使用してさまざまな実行の結果を照合し、選択したブランチの最新の実行で 1 回だけ表示されるようにします。 CodeQL 分析ワークフローによって作成された SARIF ファイルには、partialFingerprints フィールドにこのフィンガープリント データが含まれます。 upload-sarif アクションを使用して SARIF ファイルをアップロードする場合にこのデータが欠落していると、GitHub では partialFingerprints フィールドにソース ファイルからデータの入力を試みます。
+
+SARIFファイルに partialFingerprints が含まれていない場合、upload-sarif アクションは partialFingerprints フィールドを自動的に計算して、重複するアラートが発生しないようにします。 GitHub は、リポジトリに SARIF ファイルと、スタティック分析で使用されるソース コードの両方が含まれている場合にのみ、partialFingerprints を作成できます。
+
+SARIF アップロードでは、アップロードごとに最大 5,000 件の結果がサポートされます。 この制限を超える結果はすべて無視されます。 ツールで生成される結果が多すぎる場合は、最も重要なルールまたはクエリの結果に焦点を当てるように構成を更新する必要があります。
+
+アップロードごとに、SARIF アップロードでサポートされる gzip 圧縮の SARIF ファイルの最大サイズは 10 MB となります。 この制限を超えるアップロードはすべて拒否されます。 含まれる結果が多すぎるために SARIF ファイルが大きくなりすぎた場合は、最も重要なルールまたはクエリの結果に焦点を当てるように構成を更新する必要があります。
+
+リポジトリの外部で生成された SARIF ファイルのアップロード
+SARIF ファイルをリポジトリにコミットすると、それらをアップロードする新しいワークフローを作成することもできます。 これは、SARIF ファイルがご自分のリポジトリの外部の成果物として生成される場合に便利です。
+
+次の例では、コミットがリポジトリにプッシュされるたびにワークフローが実行されます。 このアクションでは、partialFingerprints プロパティを使用して、変更が発生したかどうかを確認します。
+
+コミットがプッシュされたときの実行に加えて、ワークフローは週に 1 回実行されるようにスケジュールされています。 このワークフローは、リポジトリのルートにある results.sarif ファイルをアップロードします。 このワークフローを変更して、SARIF ファイルのディレクトリをアップロードすることもできます。 たとえば、すべての SARIF ファイルをリポジトリのルートにある sarif-output というディレクトリに配置し、アクションの入力パラメーター sarif_file を sarif-output に設定できます。
+
+
+コピー
+name: "Upload SARIF"
+
+// Run workflow each time code is pushed to your repository and on a schedule. 
+//The scheduled workflow runs every Thursday at 15:45 UTC.
+
+on:
+  push:
+  schedule:
+    - cron: '45 15 * * 4'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+  steps:
+    # This step checks out a copy of your repository.
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Upload SARIF file
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        # Path to SARIF file relative to the root of the repository
+        sarif_file: results.sarif 
+CI ワークフローの一部として生成された SARIF ファイルのアップロード
+継続的インテグレーション (CI) ワークフローの一部としてサードパーティの SARIF ファイルを生成する場合は、CI テストを実行した後に upload-sarif アクションをステップとして追加できます。 CI ワークフローがまだない場合は、https://github.com/actions/starter-workflows リポジトリの starter workflow を使用して作成できます。
+
+この例では、コミットがリポジトリにプッシュされるたびにワークフローが実行されます。 このアクションでは、partialFingerprints プロパティを使用して、変更が発生したかどうかを確認します。 コミットがプッシュされたときの実行に加えて、ワークフローは週に 1 回実行されるようにスケジュールされています。
+
+この例では、ワークフローのステップとして、ESLint スタティック分析ツールを示します。 Run ESLint ステップは、ESLint ツールを実行し、results.sarif ファイルを出力します。 次に、ワークフローは、results.sarif アクションを使用して upload-sarif ファイルを GitHub にアップロードします。
+
+
+コピー
+  ```
+  name: "ESLint analysis"
+
+// Run workflow each time code is pushed to your repository and on a schedule.
+// The scheduled workflow runs every Wednesday at 15:45 UTC.
+on:
+  push:
+  schedule:
+    - cron: '45 15 * * 3'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run npm install
+        run: npm install
+      // Runs the ESlint code analysis
+      - name: Run ESLint
+        // eslint exits 1 if it finds anything to report
+        run: node_modules/.bin/eslint build docs lib script spec-main -f node_modules/@microsoft/eslint-formatter-sarif/sarif.js -o results.sarif || true
+      // Uploads results.sarif to GitHub repository using the upload-sarif action
+      - uses: github/codeql-action/upload-sarif@v1
+        with:
+          // Path to SARIF file relative to the root of the repository
+          sarif_file: results.sarif
+  ```
